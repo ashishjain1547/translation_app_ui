@@ -1,0 +1,613 @@
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Basic CSS for styling the form */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 25px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h3, h4 {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .custom_btn_controls.disabled,
+        .custom_btn_controls:disabled {
+            opacity: 0.4;
+        }
+
+        .parent p:last-of-type {
+            color: blue;
+        }
+
+
+        .customLoginWrapper {
+            padding: 10px;
+        }
+
+        .customQuestionaireApp {
+            padding: 10px;
+        }
+
+
+        .customButtonText {
+            font-size: 15px;
+        }
+
+        .customButtonIcon {
+            font-size: 13px;
+        }
+
+        .custom_btn_controls {
+            padding: 0px 4px;
+            margin: 1px;
+        }
+
+        .customWordButton {
+            margin: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ko ifnot: userLoggedIn -->
+    <div class="container">
+        <h4>User Registration</h4>
+        <p>First time users, please register...</p>
+        <form action="/register_sqlite" id="registrationForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+        </form>
+        <!-- <button type="submit" class="btn" data-bind="click: customRegister">Register</button> -->
+        <button type="submit" class="btn" data-bind="click: customRegister">
+            Register <div class="spinner-border" id="spinner" style="display: none; width: 1rem; height: 1rem;"></div>
+        </button>
+        
+       
+ 
+        <h4>User Login</h4>
+        <p>If you already have an account, please login...</p>
+        <form action="/login_sqlite" id="loginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" name="password" required>
+            </div>
+        </form>
+        <button type="submit" class="btn" data-bind="click: customLogin">Login</button>
+
+    </div>
+
+    <h3><span data-bind="text: customMessage"></span> </h3>
+    <!-- /ko -->
+
+    <!-- ko if: userLoggedIn -->
+    <div class="customQuestionaireApp">
+        <h4>अध्याय चुनें:
+            <select class="customChapterSelect" data-bind="options: availableChapters, 
+                optionsText: function(item) {
+                    return item.ch_num + ' : ' + item.ch_name
+                },
+                optionsValue: 'ch_num',
+                value: selectedChapter, 
+                event: { change: function(){ qCount(0); next_ques_chapter_wise_sqlite(); } }"></select>
+        </h4>
+
+        <h4>इन वाक्यों को हिंदी से अंग्रेजी में बदलें:</h4>
+        <h4>Sentence: <span class="customHindiSentence" data-bind="text: hindiSentence"></span></h4>
+
+
+        <div class="customWordButtonWrapper">
+            <div data-bind="foreach: optionWords">
+                <button class="customWordButton" data-bind="click: function(data, event) {
+                // console.log(event.target.innerText);
+                // console.log(wordsPickedArray());
+                //$parent.wordsPickedArray.push(event.target.innerText);
+                wordsPickedArray.push(event.target.innerText);
+
+                event.target.disabled = true;
+            }, text: $data"></button>
+            </div>
+        </div>
+
+        <br>
+
+        <button data-bind="click: clear_words_from_sentence" class="custom_btn_controls btn-info btn-lg"><i
+                class="material-icons customButtonIcon">backspace</i>
+            <span class="customButtonText">Clear</span></button>
+
+        <button data-bind="click: clear_all_words" class="custom_btn_controls btn-info btn-lg"><i
+                class="material-icons customButtonIcon">backspace</i>
+            <span class="customButtonText">Clear All</span></button>
+
+        <button data-bind="click: submit_sentence" type="button" class="custom_btn_controls btn-info btn-lg"
+            data-toggle="modal" data-target="#myModal">
+            <i class="material-icons customButtonIcon">check_circle</i> <span
+                class="customButtonText">Submit</span></button>
+
+        <button data-bind="click: handle_next_question, enable: hasSubmittedAnswer"
+            class="custom_btn_controls btn-info btn-lg"><i class="material-icons customButtonIcon">forward</i> <span
+                class="customButtonText">Next</span></button>
+
+        <button data-bind="click: show_hint, enable: !hintDisabled()" class="custom_btn_controls btn-info btn-lg">
+            <i class="material-icons customButtonIcon">help_outline</i>
+            <span class="customButtonText">Hint (<span data-bind="text: hintCounter"></span>)</span></button>
+
+        <button disabled class="custom_btn_controls btn-lg" style="opacity: 1;">
+            <!-- <i class="material-icons customButtonIcon">info_outline</i> -->
+            <span class="customButtonText"><span data-bind="text: qCount"></span>/<span
+                    data-bind="text: total_qcount"></span></span></button>
+
+        <br>
+        <br>
+        <h3 class="customSentenceFormed" data-bind="text: sentenceFormed"></h3>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"></h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <h4 class="custom_model_body_message">Some text in the modal.</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- /ko -->
+
+
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+
+<script>
+    let HOST = 'https://ashishjain1547.pythonanywhere.com';
+    //let HOST = 'http://127.0.0.1:6050';
+
+    let set_of_words = {
+        "set1": ["is", "was", "be", "been", "am"],
+        "set2": ["this", "that", "here", "there", "those", "them"],
+        "set3": ["what", "where", "when", "how"],
+        "set4": ["if", "but", "then", "else", "because"],
+        "set5": ["he", "him", "she", "her", "they", "it"],
+        "set6": ["a", "an", "the", "some"],
+        "set7": ["in", "on", "of", "to", "upon", "up", "down"],
+        "set8": ["no", 'not', 'nor', 'neither'],
+        "set9": ["do", "does", "did", 'done', "doing"],
+        "set10": ["eat", "eats", "ate", "eating", "eaten"]
+    }
+
+    let viewModel = function () {
+        let self = this;
+        self.more_text = ko.observable("Hello!");
+
+        self.customMessage = ko.observable("");
+
+
+        self.jwtToken = ko.observable();
+        self.userLoggedIn = ko.observable(false);
+
+
+        self.hindiSentence = ko.observable("");
+        self.englishSentence = ko.observable("");
+
+        self.optionWords = ko.observableArray([]);
+
+        self.hintCounter = ko.observable(0);
+        self.hintDisabled = ko.observable(false);
+
+        self.wordsPickedArray = ko.observableArray([]);
+        self.sentenceFormed = ko.computed(function () {
+            return self.wordsPickedArray().join(" ");
+        });
+
+        self.username = ko.observable("");
+
+        self.hasSubmittedAnswer = ko.observable(false);
+
+        self.pair_id = ko.observable(-1);
+
+
+        // Observable array to hold the data
+        self.availableChapters = ko.observableArray([]);
+
+        self.chapters_qcount = {}
+        self.qCount = ko.observable(0);
+        self.total_qcount = ko.observable(0);
+        self.chapter_numbers = ko.observableArray();
+
+
+
+        self.customRegister = function () {
+            $('#spinner').show();
+
+            // Get form data
+            var formData = $('#registrationForm').serialize();
+            // console.log(formData);
+
+            // Send AJAX request
+            $.ajax({
+                url: `${HOST}/register_sqlite`,
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Handle success response
+                    console.log(response);
+                    console.log('Registration successful!');
+                    self.customMessage(response['username'] + " logged in.");
+
+                    self.username(response['username']);
+                    localStorage.setItem("questionnaire_username", response['username']);
+
+                    self.jwtToken(response['token']);
+                    localStorage.setItem("questionnaire_token", response['token']);
+
+
+                    self.userLoggedIn(true);
+                    self.getChapters();
+                    // self.next_ques();
+                    $('#spinner').hide();
+                  
+                    
+                    
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                    console.log('Registration failed with error code 4001. Please try again.');
+
+                    if (xhr.responseText == "Username is not unique") {
+                        self.customMessage("Username already exists.");
+                    }
+                    else if (xhr.responseText.includes("UNIQUE constraint failed: attempted_hindi_to_eng_ques.username, attempted_hindi_to_eng_ques.pair_id")) {
+                        self.customMessage(xhr.responseText);
+                        alert(xhr.responseText); 
+
+                    }
+                    $('#spinner').hide();
+                       
+                }
+            });
+        }
+
+        self.showProtectedResource = function () {
+            $.ajax({
+                url: `${HOST}/protected`,
+                type: 'GET',
+
+                headers: {
+                    'Authorization': self.jwtToken()
+                },
+
+                success: function (response) {
+                    // Handle success response
+                    console.log(response);
+                    console.log('showProtectedResource() successful!');
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    console.error(xhr.responseText);
+                    alert('Registration failed. Please try again.');
+                }
+            });
+        }
+
+        self.customLogin = function () {
+
+            // Get form data
+            var formData = $('#loginForm').serialize();
+            // console.log(formData);
+
+            // Send AJAX request
+            $.ajax({
+                url: `${HOST}/login_sqlite`,
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    console.log(response);
+                    console.log('Login successful!');
+                    self.customMessage(response['username'] + " logged in.");
+                    self.username(response['username']);
+                    localStorage.setItem("questionnaire_username", response['username']);
+
+                    self.jwtToken(response['token']);
+                    localStorage.setItem("questionnaire_token", response['token']);
+
+                    self.userLoggedIn(true);
+
+                    self.getChapters();
+                    self.next_ques_chapter_wise_sqlite();
+                },
+                error: function (xhr, status, error) {
+                    // Handle error response
+                    console.error(xhr.responseText);
+                    console.error(xhr.status);
+                    console.log('Request failed. Please try again.');
+
+                    self.customMessage("Invalid username / password.");
+                }
+            });
+        }
+
+
+        // Function to load data from API
+        self.getChapters = function () {
+            $.ajax({
+                url: `${HOST}/get_chapters_sqlite`,
+                method: 'GET',
+                success: function (response) {
+                    console.log(response);
+                    self.availableChapters(response);
+
+                    for (const i of response) {
+                        self.chapters_qcount[i.ch_num] = i.qcount
+                        self.chapter_numbers().push(i.ch_num);
+                    }
+
+                    /*
+                    self.availableChapters = ko.observableArray([
+                        { "ch_num": 1.1, "ch_name": "Ram and Mango", "qcount": "5" },
+                        { "ch_num": 1.2, "ch_name": "To", "qcount": "6" },
+                        { "ch_num": 1.3, "ch_name": "This and These", "qcount": "5" },
+                        { "ch_num": 1.4, "ch_name": "With", "qcount": "6" },
+                        { "ch_num": 2.1, "ch_name": "When", "qcount": "5" },
+                    ]);
+                    */
+                },
+                error: function (error) {
+                    console.error('Error loading data:', error);
+                }
+            });
+        };
+
+        self.selectedChapter = ko.observable(1);
+
+
+        self.next_ques_chapter_wise_sqlite = function () {
+            $.post({
+                url: `${HOST}/next_ques_chapter_wise_sqlite`,
+                headers: { "Content-Type": "application/json" },
+                data: {
+                    username: self.username(),
+                    chapter: self.selectedChapter()
+                },
+
+                success: function (result) {
+                    self.total_qcount(self.chapters_qcount[self.selectedChapter()]);
+                    let temp = self.qCount() + 1;
+
+                    console.log("From next_ques():")
+                    console.log(result);
+
+                    if (temp <= parseInt(self.total_qcount())) {
+                        self.qCount(temp);
+                        self.pair_id(result['pair_id']);
+                        self.hindiSentence(result['hindi']);
+                        self.englishSentence(result['english']);
+                        self.show_next_ques();
+                    }
+
+                    else {
+                        let ch_index = self.chapter_numbers().indexOf(self.selectedChapter());
+                        if (ch_index < self.chapter_numbers().length - 1) {
+                            self.qCount(0);
+
+                            console.log(self.chapter_numbers()[ch_index + 1]);
+                            // $(".customChaptersSelect").val(self.chapter_numbers()[ch_index + 1]);
+                            self.selectedChapter(self.chapter_numbers()[ch_index + 1]);
+                            self.next_ques_chapter_wise_sqlite();
+                        }
+                    }
+
+                },
+
+                error: function (xhr, status, error) {
+                    console.log(self.selectedChapter());
+                    console.log(xhr, status, error);
+                }
+            });
+        };
+
+        self.show_next_ques = function () {
+            console.log(self.englishSentence());
+            self.optionWords(shuffle(self.englishSentence().split(" ")));
+        };
+
+        self.clear_words_from_sentence = function () {
+            let x = self.wordsPickedArray.pop();
+
+
+            $(".customWordButton[disabled]").each(function () {
+                if (this.innerText == x) {
+                    this.disabled = false;
+                    return false;
+                }
+            });
+        }
+
+        self.clear_all_words = function () {
+            self.wordsPickedArray([]);
+            $(".customWordButton").prop('disabled', false);
+            self.hintCounter(0);
+            self.hintDisabled(false);
+        };
+
+        self.submit_sentence = function () {
+
+            if (self.wordsPickedArray().length == 0) {
+                $("#myModal .custom_model_body_message").html("कृपया पहले वाक्य बनाएं");
+            }
+
+            else if (self.sentenceFormed() != self.englishSentence()) {
+                $("#myModal .custom_model_body_message").html("आपका वाक्य गलत है");
+                self.hasSubmittedAnswer(true);
+                self.write_to_attempt_log('FALSE'); // Boolean value for SQLite
+            }
+
+            else if (self.sentenceFormed() === self.englishSentence()) {
+                $("#myModal .custom_model_body_message").html("आपका वाक्य सही है");
+                self.hasSubmittedAnswer(true);
+                self.write_to_attempt_log('TRUE'); // Boolean value for SQLite
+            }
+        }
+
+        self.write_to_attempt_log = function (attempt_result) {
+            $.post({
+                url: `${HOST}/write_to_attempt_log_sqlite`,
+                headers: { "Content-Type": "application/json" },
+                data: {
+                    username: self.username(),
+                    pair_id: self.pair_id(),
+                    result: attempt_result
+                },
+
+                success: function (out) {
+                    console.log("Success: " + out)
+                },
+
+                error: function (xhr, status, error) {
+                    console.log(self.selectedChapter());
+                    console.log(xhr, status, error);
+                }
+            });
+        }
+
+        self.handle_next_question = function () {
+            self.next_ques_chapter_wise_sqlite();
+            self.clear_all_words();
+            self.hasSubmittedAnswer(false);
+            self.hintCounter(0);
+            self.hintDisabled(false);
+        }
+
+        self.show_hint = function () {
+            self.wordsPickedArray([]);
+            $(".customWordButton").prop('disabled', false);
+
+            let x = self.englishSentence().split(" ");
+
+            for (let i = 0; i < self.hintCounter() + 1; i++) {
+                self.wordsPickedArray.push(x[i])
+
+                $(".customWordButton").each(function () {
+                    if (this.innerText == x[i]) {
+                        this.disabled = true;
+                        return false;
+                    }
+                })
+            }
+
+            if (self.hintCounter() < x.length) {
+                self.hintCounter(self.hintCounter() + 1);
+                if (self.hintCounter() >= x.length) {
+                    self.hintDisabled(true);
+                }
+            }
+        }
+
+
+
+    };
+
+    ko.applyBindings(viewModel);
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+
+        // While there remain elements to shuffle.
+        while (currentIndex > 0) {
+
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+
+        return array;
+    }
+</script>
