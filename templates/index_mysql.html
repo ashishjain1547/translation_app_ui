@@ -107,61 +107,246 @@
         .customWordButton {
             margin: 0.95px; /* Adjusted from 1px to 0.95px */
         }
+
+        .customLogoutBtn {
+            width: auto !important;
+            padding: 8px 20px !important;
+            margin-left: 10px;
+            font-size: 14.25px;
+        }
+
+        .welcomeHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .welcomeHeader h4 {
+            margin: 0;
+        }
+
+        .welcomeHeader .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Updated Auth Form Styles */
+        .auth-container {
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        .auth-header h4 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: #7f8c8d;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .auth-form {
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-size: 15px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .auth-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .auth-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .auth-divider::before {
+            left: 0;
+        }
+
+        .auth-divider::after {
+            right: 0;
+        }
+
+        .auth-divider span {
+            background: #fff;
+            padding: 0 10px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .auth-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .auth-message.error {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .auth-message.success {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        /* Add these styles for the registration message */
+        .registration-message {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .registration-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .registration-message.error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .registration-message.success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
     </style>
 </head>
 
 <body data-bind="template: { afterRender: initApp }">
     <!-- ko ifnot: userLoggedIn -->
-    <div class="container">
-        <h4 class="customFormHeader">User Registration</h4>
-        <p>First time users, please register...</p>
-        <form action="/register_mysql" id="registrationForm">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h4>Welcome to Translation App</h4>
+            <p>First time users, please register below</p>
+        </div>
+        <form class="auth-form" action="/register_mysql" id="registrationForm">
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter your username">
             </div>
             <div class="form-group">
-                <label for="confirm_password">Confirm Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
             </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+            </div>
+            <button type="submit" class="auth-btn" data-bind="click: customRegister">
+                Register <div class="spinner-border" id="spinner" style="display: none; width: 0.95rem; height: 0.95rem;"></div>
+            </button>
+            <div class="registration-message" data-bind="text: registrationMessage, css: { 'show': registrationMessage(), 'error': registrationMessage() && registrationMessage().includes('exists'), 'success': registrationMessage() && !registrationMessage().includes('exists') }"></div>
         </form>
-        <!-- <button type="submit" class="btn" data-bind="click: customRegister">Register</button> -->
-        <button type="submit" class="btn" data-bind="click: customRegister">
-            Register <div class="spinner-border" id="spinner" style="display: none; width: 0.95rem; height: 0.95rem;"></div>
-        </button>
-        
-       
- 
-        <h4 class="customFormHeader">User Login</h4>
-        <p>If you already have an account, please login...</p>
-        <form action="/login_mysql" id="loginForm">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" name="username" required>
-            </div>
 
+        <div class="auth-divider">
+            <span>OR</span>
+        </div>
+
+        <div class="auth-header">
+            <p>Already have an account?</p>
+        </div>
+        <form class="auth-form" action="/login_mysql" id="loginForm">
             <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" name="password" required>
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username" name="username" required placeholder="Enter your username">
             </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="auth-btn" data-bind="click: customLogin">Login</button>
+            <div class="registration-message" data-bind="text: loginMessage, css: { 'show': loginMessage(), 'error': loginMessage() && loginMessage().includes('Invalid'), 'success': loginMessage() && !loginMessage().includes('Invalid') }"></div>
         </form>
-        <button type="submit" class="btn" data-bind="click: customLogin">Login</button>
-
     </div>
 
-    <h3><span data-bind="text: customMessage"></span> </h3>
     <!-- /ko -->
 
     <!-- ko if: userLoggedIn -->
     <div class="customQuestionaireApp">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Welcome, <span data-bind="text: username"></span>!</h4>
-            <button class="btn btn-danger" data-bind="click: logout">Logout</button>
+        <div class="welcomeHeader">
+            <div class="user-info">
+                <h4>Welcome, <span data-bind="text: username"></span>!</h4>
+            </div>
+            <button class="btn btn-danger customLogoutBtn" data-bind="click: logout">Logout</button>
         </div>
         <h4>अध्याय चुनें:
             <select class="customChapterSelect" data-bind="options: availableChapters, 
@@ -212,11 +397,6 @@
         <button data-bind="click: show_hint, enable: !hintDisabled()" class="custom_btn_controls btn-info btn-lg">
             <i class="material-icons customButtonIcon">help_outline</i>
             <span class="customButtonText">Hint (<span data-bind="text: hintCounter"></span>)</span></button>
-
-        <button disabled class="custom_btn_controls btn-lg" style="opacity: 1;">
-            <!-- <i class="material-icons customButtonIcon">info_outline</i> -->
-            <span class="customButtonText"><span data-bind="text: qCount"></span>/<span
-                    data-bind="text: total_qcount"></span></span></button>
 
         <br>
         <br>
@@ -292,6 +472,7 @@
                 self.userLoggedIn(true);
                 self.getChapters();
                 self.next_ques_chapter_wise();
+                self.getUserProgress();
             }
         };
 
@@ -331,10 +512,10 @@
 
         self.customRegister = function () {
             $('#spinner').show();
+            self.registrationMessage(""); // Clear previous message
 
             // Get form data
             var formData = $('#registrationForm').serialize();
-            // console.log(formData);
 
             // Send AJAX request
             $.ajax({
@@ -345,14 +526,13 @@
                     // Handle success response
                     if (response.error) {
                         console.log(response.error);
-                        self.customMessage(response.error);
-
+                        self.registrationMessage(response.error);
                         $('#spinner').hide();
                         return;
                     } else {
                         console.log(response);
                         console.log('Registration successful!');
-                        self.customMessage(response['username'] + " logged in.");
+                        self.registrationMessage("Registration successful! Logging you in...");
 
                         self.username(response['username']);
                         localStorage.setItem("questionnaire_username", response['username']);
@@ -360,11 +540,13 @@
                         self.jwtToken(response['token']);
                         localStorage.setItem("questionnaire_token", response['token']);
 
-
-                        self.userLoggedIn(true);
-                        self.getChapters();
-                        // self.next_ques();
-                        $('#spinner').hide();
+                        // Delay the login transition slightly to show the success message
+                        setTimeout(function() {
+                            self.userLoggedIn(true);
+                            self.getChapters();
+                            self.next_ques_chapter_wise();
+                            self.getUserProgress();
+                        }, 1000);
                     }
                 },
                 error: function (xhr, status, error) {
@@ -372,18 +554,20 @@
                     console.log(xhr.responseText);
                     console.log(status);
                     console.log(error);
-                    console.log('Registration failed with error code 4001. Please try again.');
 
-                    if (xhr.responseText == "Username is not unique") {
-                        self.customMessage("Username already exists.");
-                    }
-                    else if (xhr.responseText.includes("UNIQUE constraint failed: attempted_hindi_to_eng_ques.username, attempted_hindi_to_eng_ques.pair_id")) {
-                        self.customMessage(xhr.responseText);
-                        alert(xhr.responseText); 
-
+                    if (xhr.responseText.includes("Username is not unique")) {
+                        // This error comes from user_login table's unique constraint
+                        self.registrationMessage("Username already exists. Please choose a different username.");
+                    } else if (xhr.responseText.includes("UNIQUE constraint failed: attempted_hindi_to_eng_ques")) {
+                        // This error comes from attempted_hindi_to_eng_ques table's unique constraint
+                        self.registrationMessage("This username has existing progress data. Please choose a different username.");
+                    } else if (xhr.responseText.includes("UNIQUE constraint failed")) {
+                        // Generic unique constraint error
+                        self.registrationMessage("Database error. Please try again with a different username.");
+                    } else {
+                        self.registrationMessage("Registration failed. Please try again.");
                     }
                     $('#spinner').hide();
-                       
                 }
             });
         }
@@ -410,11 +594,13 @@
             });
         }
 
+        self.loginMessage = ko.observable("");
+
         self.customLogin = function () {
+            self.loginMessage(""); // Clear previous message
 
             // Get form data
             var formData = $('#loginForm').serialize();
-            // console.log(formData);
 
             // Send AJAX request
             $.ajax({
@@ -424,17 +610,21 @@
                 success: function (response) {
                     console.log(response);
                     console.log('Login successful!');
-                    self.customMessage(response['username'] + " logged in.");
+                    self.loginMessage("Login successful! Redirecting...");
+
                     self.username(response['username']);
                     localStorage.setItem("questionnaire_username", response['username']);
 
                     self.jwtToken(response['token']);
                     localStorage.setItem("questionnaire_token", response['token']);
 
-                    self.userLoggedIn(true);
-
-                    self.getChapters();
-                    self.next_ques_chapter_wise();
+                    // Delay the login transition slightly to show the success message
+                    setTimeout(function() {
+                        self.userLoggedIn(true);
+                        self.getChapters();
+                        self.next_ques_chapter_wise();
+                        self.getUserProgress();
+                    }, 1000);
                 },
                 error: function (xhr, status, error) {
                     // Handle error response
@@ -442,15 +632,35 @@
                     console.error(xhr.status);
                     console.log('Request failed. Please try again.');
 
-                    self.customMessage("Invalid username / password.");
+                    self.loginMessage("Invalid username or password. Please try again.");
                 }
             });
         }
 
         self.logout = function() {
+            // Clear user authentication
             localStorage.removeItem("questionnaire_username");
             localStorage.removeItem("questionnaire_token");
+            
+            // Reset translation state
             self.userLoggedIn(false);
+            self.username("");
+            self.jwtToken("");
+            self.hindiSentence("");
+            self.englishSentence("");
+            self.wordsPickedArray([]);
+            self.optionWords([]);
+            self.hintCounter(0);
+            self.hintDisabled(false);
+            self.qCount(0);
+            self.total_qcount(0);
+            self.availableChapters([]);
+            self.pair_id(-1);
+            self.hasSubmittedAnswer(false);
+            self.chapters_qcount = {};
+            self.chapter_numbers([]);
+            self.totalAttempted(0);
+            self.customMessage("Logged out successfully");
         }
 
         // Function to load data from API
@@ -628,8 +838,27 @@
             }
         }
 
+        self.registrationMessage = ko.observable("");
+        self.totalAttempted = ko.observable(0);
 
-
+        // Function to get user's total progress
+        self.getUserProgress = function() {
+            $.ajax({
+                url: `${HOST}/get_user_progress_mysql`,
+                type: 'GET',
+                headers: {
+                    'Authorization': self.jwtToken()
+                },
+                success: function(response) {
+                    if (response && response.total_attempted) {
+                        self.totalAttempted(response.total_attempted);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to fetch user progress:', error);
+                }
+            });
+        };
     };
 
     ko.applyBindings(viewModel);
