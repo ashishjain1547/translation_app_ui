@@ -109,21 +109,23 @@
         }
 
         .customLogoutBtn {
+            display: inline-block;
             width: auto !important;
-            padding: 8px 20px !important;
+            padding: 3px 8px;
             margin-left: 10px;
             font-size: 14.25px;
+            position: relative;
+            top: -5px;
         }
 
         .welcomeHeader {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: block;
             margin-bottom: 15px;
             padding: 10px 15px;
             background-color: #f8fafc;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            height: 45px;
         }
 
         .welcomeHeader h4 {
@@ -131,8 +133,7 @@
         }
 
         .welcomeHeader .user-info {
-            display: flex;
-            align-items: center;
+            float: left;
         }
 
         /* Updated Auth Form Styles */
@@ -288,6 +289,44 @@
             color: #16a34a;
             border: 1px solid #bbf7d0;
         }
+
+        .solid-circle-triangle {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            padding: 5px;
+            align-items: center;
+            background-color: black;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .solid-circle-triangle::before {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 7.5px solid white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .customWelcomeHeaderRightBlock {
+            float: right;
+        }
+
+        .customWelcomeHeaderWhenHidden {
+            display: none;
+            text-align: right;
+            padding: 5px;
+        }
+
+        .customFontForDescriptiveH4 {
+            font-size: 18px;
+        }
     </style>
 </head>
 
@@ -342,13 +381,20 @@
 
     <!-- ko if: userLoggedIn -->
     <div class="customQuestionaireApp">
+        <div class="customWelcomeHeaderWhenHidden">
+            <div class="solid-circle-triangle" data-bind="click: clearHeader"></div>
+        </div>
         <div class="welcomeHeader">
             <div class="user-info">
-                <h4>Welcome, <span data-bind="text: username"></span>!</h4>
+                <h4 class="customFontForDescriptiveH4">Welcome, <span data-bind="text: username"></span>!</h4>
             </div>
-            <button class="btn btn-danger customLogoutBtn" data-bind="click: logout">Logout</button>
+
+            <div class="customWelcomeHeaderRightBlock">
+                <div class="solid-circle-triangle" data-bind="click: clearHeader"></div>
+                <button class="btn btn-danger customLogoutBtn" data-bind="click: logout">Logout</button>
+            </div>
         </div>
-        <h4>अध्याय चुनें:
+        <h4 class="customHeaderChooseChapter customFontForDescriptiveH4">अध्याय चुनें:
             <select class="customChapterSelect" data-bind="options: availableChapters, 
                 optionsText: function(item) {
                     return item.ch_num + ' : ' + item.ch_name
@@ -357,9 +403,14 @@
                 value: selectedChapter, 
                 event: { change: function(){ qCount(0); next_ques_chapter_wise(); } }"></select>
         </h4>
+        <h4 class="customHeaderChooseDifficulty customFontForDescriptiveH4">कठिनता: 
+            <select class="customDifficultySelect" data-bind="options: availableDifficulties, 
+                value: selectedDifficulty,
+                event: { change: function(){ qCount(0); next_ques_chapter_wise(); } }"></select>
+        </h4>
 
-        <h4>इन वाक्यों को हिंदी से अंग्रेजी में बदलें:</h4>
-        <h4>Sentence: <span class="customHindiSentence" data-bind="text: hindiSentence"></span></h4>
+        <h4 class="customHeaderTranslate customFontForDescriptiveH4">इन वाक्यों को हिंदी से अंग्रेजी में बदलें:</h4>
+        <h4><span class="customHeaderSentenceLabel">Sentence:</span> <span class="customHindiSentence" data-bind="text: hindiSentence"></span></h4>
 
 
         <div class="customWordButtonWrapper">
@@ -397,7 +448,11 @@
         <button data-bind="click: show_hint, enable: !hintDisabled()" class="custom_btn_controls btn-info btn-lg">
             <i class="material-icons customButtonIcon">help_outline</i>
             <span class="customButtonText">Hint (<span data-bind="text: hintCounter"></span>)</span></button>
-
+    
+        <button disabled class="custom_btn_controls btn-lg" style="opacity: 1;">
+            <span class="customButtonText"><span data-bind="text: qCount"></span>/<span
+                    data-bind="text: total_qcount"></span></span></button>
+    
         <br>
         <br>
         <h3 class="customSentenceFormed" data-bind="text: sentenceFormed"></h3>
@@ -436,8 +491,8 @@
 
 <script>
     let hostname = window.location.hostname;
-    //let HOST = 'https://ashishjain1547.pythonanywhere.com'
-    let HOST = 'http://127.0.0.1:6050';
+    let HOST = 'https://ashishjain1547.pythonanywhere.com'
+    //let HOST = 'http://127.0.0.1:6050';
 
 
     let set_of_words = {
@@ -508,7 +563,8 @@
         self.total_qcount = ko.observable(0);
         self.chapter_numbers = ko.observableArray();
 
-
+        self.availableDifficulties = ko.observableArray(["Easy", "Medium", "Hard"]);
+        self.selectedDifficulty = ko.observable("Easy");
 
         self.customRegister = function () {
             $('#spinner').show();
@@ -666,17 +722,24 @@
         // Function to load data from API
         self.getChapters = function () {
             $.ajax({
-                url: `${HOST}/get_chapters_mysql`,
+                url: `${HOST}/get_qcount_for_chapters_and_difficulty_wise`,
                 method: 'GET',
                 success: function (response) {
                     console.log(response);
                     self.availableChapters(response);
 
                     for (const i of response) {
-                        self.chapters_qcount[i.ch_num] = i.qcount
+                        self.chapters_qcount[i.ch_num] = {
+                            "Easy": i.easy,
+                            "Medium": i.medium,
+                            "Hard": i.hard
+                        };
+
                         self.chapter_numbers().push(i.ch_num);
                     }
 
+                    console.log("self.chapters_qcount");
+                    console.log(self.chapters_qcount);
                     /*
                     self.availableChapters = ko.observableArray([
                         { "ch_num": 1.1, "ch_name": "Ram and Mango", "qcount": "5" },
@@ -697,16 +760,20 @@
 
 
         self.next_ques_chapter_wise = function () {
+            data = {
+                username: self.username(),
+                chapter: self.selectedChapter(),
+                difficulty: self.selectedDifficulty()
+            }
+            console.log(data)
+
             $.post({
-                url: `${HOST}/next_ques_chapter_wise_mysql`,
+                url: `${HOST}/next_ques_chapter_and_difficulty_wise`,
                 headers: { "Content-Type": "application/json" },
-                data: {
-                    username: self.username(),
-                    chapter: self.selectedChapter()
-                },
+                data: data,
 
                 success: function (result) {
-                    self.total_qcount(self.chapters_qcount[self.selectedChapter()]);
+                    self.total_qcount(self.chapters_qcount[self.selectedChapter()]['' + self.selectedDifficulty()]);
                     let temp = self.qCount() + 1;
 
                     console.log("From next_ques():")
@@ -736,6 +803,7 @@
 
                 error: function (xhr, status, error) {
                     console.log(self.selectedChapter());
+                    console.log(self.selectedDifficulty());
                     console.log(xhr, status, error);
                 }
             });
@@ -858,6 +926,15 @@
                     console.error('Failed to fetch user progress:', error);
                 }
             });
+        };
+
+        self.clearHeader = function() {
+            $(".customHeaderChooseChapter").toggle();
+            $(".customHeaderChooseDifficulty").toggle();
+            $(".customHeaderTranslate").toggle();
+            $(".customHeaderSentenceLabel").toggle();
+            $(".customWelcomeHeaderWhenHidden").toggle();
+            $("div.welcomeHeader").toggle();
         };
     };
 
