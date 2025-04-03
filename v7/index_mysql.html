@@ -300,6 +300,9 @@
             border-radius: 50%;
             position: relative;
         }
+        .rotated-topdown {
+            transform: rotate(180deg);
+        }
 
         .solid-circle-triangle::before {
             content: "";
@@ -326,6 +329,15 @@
 
         .customFontForDescriptiveH4 {
             font-size: 18px;
+        }
+
+        .custom_progress_button {
+            padding: 10px;
+            text-align: right;
+        }
+
+        .custom_progress_button .solid-circle-triangle {
+            top: 5px;
         }
     </style>
 </head>
@@ -382,7 +394,7 @@
     <!-- ko if: userLoggedIn -->
     <div class="customQuestionaireApp">
         <div class="customWelcomeHeaderWhenHidden">
-            <div class="solid-circle-triangle" data-bind="click: clearHeader"></div>
+            <div class="solid-circle-triangle rotated-topdown" data-bind="click: clearHeader"></div>
         </div>
         <div class="welcomeHeader">
             <div class="user-info">
@@ -482,8 +494,73 @@
     </div>
 
     <!-- /ko -->
+    <div id="progressToggle"></div>
 
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
 
+    <script type="text/babel">
+    class ProgressToggle extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                showProgress: false,
+                progressData: [],
+                loading: false
+            };
+        }
+
+        fetchProgressData = async () => {
+            try {
+                this.setState({ loading: true });
+                const response = await fetch(`${HOST}/get_user_progress_mysql`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                console.log(response);
+                const data = await response.json();
+                console.log(data);
+                this.setState({ progressData: data, loading: false });
+            } catch (error) {
+                console.error('Error fetching progress data:', error);
+                this.setState({ loading: false });
+            }
+        }
+
+        toggleProgress = () => {
+            this.setState(prevState => ({
+                showProgress: !prevState.showProgress
+            }));
+        }
+
+        render() {
+            return (
+                <React.Fragment>
+                    <div 
+                        className="custom_progress_button" 
+                        onClick={this.toggleProgress}
+                    >
+                        Progress <div className="solid-circle-triangle rotated-topdown"></div>
+                    </div>
+                    <div 
+                        className="custom_progress_wrapper" 
+                        style={{ display: this.state.showProgress ? 'block' : 'none' }}
+                    >
+                        <button className="custom_get_progress_data" onClick={this.fetchProgressData}>Data</button>
+                    </div>
+                </React.Fragment>
+            );
+        }
+    }
+
+    ReactDOM.render(
+        <ProgressToggle />,
+        document.getElementById('progressToggle')
+    );
+    </script>
 
 </body>
 
@@ -491,8 +568,8 @@
 
 <script>
     let hostname = window.location.hostname;
-    let HOST = 'https://ashishjain1547.pythonanywhere.com'
-    //let HOST = 'http://127.0.0.1:6050';
+    //let HOST = 'https://ashishjain1547.pythonanywhere.com'
+    let HOST = 'http://127.0.0.1:6050';
 
 
     let set_of_words = {
@@ -854,7 +931,7 @@
 
         self.write_to_attempt_log = function (attempt_result) {
             $.post({
-                url: `${HOST}/write_to_attempt_log`,
+                url: `${HOST}/write_to_attempt_log_mysql`,
                 headers: { "Content-Type": "application/json" },
                 data: {
                     username: self.username(),
